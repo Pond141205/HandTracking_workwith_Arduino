@@ -1,0 +1,42 @@
+import cv2
+from HandDetector import HandDetector
+
+
+handDetector = HandDetector()
+
+cap = cv2.VideoCapture(0)
+
+while True:
+    success, img = cap.read()
+    
+    img = handDetector.find_hands(img)
+    land_mark_list = handDetector.find_position(img)
+    
+    finger_states = {}  # Initialize a dictionary to store finger states
+    
+    if land_mark_list:
+        fingers_up = handDetector.find_hands(img) # Calculate finger angles
+        
+        if fingers_up is not None:
+            for finger_id, up in enumerate(fingers_up):
+                finger_name = "Pinky" if finger_id == 3 else \
+                              "Index" if finger_id == 0 else \
+                              "Middle" if finger_id == 1 else \
+                              "Ring" if finger_id == 2 else "Thumb"
+                
+                finger_states[finger_name] = up
+                
+                # Visualization code here as before
+    
+    cv2.imshow('image', img)
+    
+    # Print finger states
+    for finger_name, state in finger_states.items():
+        print(f'{finger_name}: {state}')
+        
+    # Check if 'q' key is pressed & Add delay of 500 milliseconds (100 ms = 0.1 seconds)
+    if cv2.waitKey(100) & 0xff == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
