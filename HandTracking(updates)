@@ -1,0 +1,44 @@
+import cv2
+from HandDetector import HandDetector
+
+
+handDetector = HandDetector()
+
+cap = cv2.VideoCapture(0)
+
+tips_ids = [4, 8, 12, 16, 20]
+
+while True:
+    success, img = cap.read()
+    img = handDetector.find_hands(img)
+    land_mark_list = handDetector.find_position(img, draw=False)
+
+    if len(land_mark_list) != 0:
+        fingers = []
+
+        #Thunb
+        if land_mark_list[tips_ids[0]][1] > land_mark_list[tips_ids[0]-1][1]:
+                fingers.append(1)
+        else:
+                fingers.append(0)
+        
+        #4 fingers
+        for id in range(1, 5):
+            if land_mark_list[tips_ids[id]][2] < land_mark_list[tips_ids[id]-2][2]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
+
+        print(fingers)
+
+
+    cv2.imshow('image', img)
+    
+
+        
+    # Check if 'q' key is pressed & Add delay of 500 milliseconds (100 ms = 0.1 seconds)
+    if cv2.waitKey(50) & 0xff == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
