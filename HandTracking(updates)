@@ -1,12 +1,27 @@
 import cv2
+import serial
+global ser 
 from HandDetector import HandDetector
 
 
 handDetector = HandDetector()
-
 cap = cv2.VideoCapture(0)
-
 tips_ids = [4, 8, 12, 16, 20]
+portNo = "COM3" #don't forgot to change port com
+
+
+
+def connectToRobot(portNo):
+    try:
+        ser = serial.Serial(portNo, 9600)
+        print("Robot Connected")
+        return ser  # Return the serial object on successful connection
+    except Exception as e:
+        print("Error: Not Connected To Robot -", e)
+        return None  # Return None if connection fails
+    
+ser = connectToRobot(portNo) # Attempt to establish the serial connection
+
 
 while True:
     success, img = cap.read()
@@ -31,8 +46,21 @@ while True:
 
         print(fingers)
 
+        #sendData to port
+        string = "$" + str(int(fingers[0])) + str(int(fingers[1])) + str(int(fingers[2])) + \
+                 str(int(fingers[3])) + str(int(fingers[4]))
+    
+    try:
+        ser.write(string.encode())
+        print(string)
+    except Exception as e:
+        print("Error writing to serial:", e)
+        pass
+
 
     cv2.imshow('image', img)
+
+     
     
 
         
